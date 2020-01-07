@@ -24,11 +24,15 @@
 #include "copyright.h"
 #include "system.h"
 #include "syscall.h"
+#include "synchconsole.h"
+#include "synch.h"
 
 //----------------------------------------------------------------------
 // UpdatePC : Increments the Program Counter register in order to resume
 // the user program immediately after the "syscall" instruction.
 //----------------------------------------------------------------------
+//static SynchConsole *sync;
+static Semaphore *readAvail;
 static void
 UpdatePC ()
 {
@@ -63,7 +67,7 @@ UpdatePC ()
 //      "which" is the kind of exception.  The list of possible exceptions 
 //      are in machine.h.
 //----------------------------------------------------------------------
-
+/*
 void
 ExceptionHandler (ExceptionType which)
 {
@@ -83,4 +87,43 @@ ExceptionHandler (ExceptionType which)
     // LB: Do not forget to increment the pc before returning!
     UpdatePC ();
     // End of addition
+}
+*/
+
+void
+ExceptionHandler(ExceptionType which)
+{
+
+    int type = machine->ReadRegister(2);
+    readAvail = new Semaphore ("read avail", 0);
+    //sync = new SynchConsole(NULL,NULL);
+    /*if ((which == SyscallException) && (type == SC_Halt)) {
+        DEBUG(’a’, "Shutdown, initiated by user program.\n");
+        interrupt->Halt();
+    } else {
+        printf("Unexpected user mode exception %d %d\n", which, type);
+        ASSERT(FALSE);
+    }*/
+    if (which == SyscallException) {
+        switch (type) {
+        case SC_Halt: {
+            DEBUG('a', "Shutdown, initiated by user program.\n");
+            interrupt->Halt();
+        break;
+        }
+        case SC_PutChar: {
+            readAvail->V();
+            //printf("%c\n",(char)machine->ReadRegister(4));
+            synchconsole->SynchPutChar(machine->ReadRegister(4));
+            readAvail->P();
+        break;
+        }
+        default: {
+            printf("Unexpected user mode exception %d %d\n", which, type);
+            ASSERT(FALSE);
+        break;
+        }
+        }
+        UpdatePC();
+    }
 }

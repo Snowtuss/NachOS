@@ -31,7 +31,7 @@
 //
 //      "threadName" is an arbitrary string, useful for debugging.
 //----------------------------------------------------------------------
-
+bool FirstYield = true;
 Thread::Thread (const char *threadName)
 {
     name = threadName;
@@ -196,20 +196,27 @@ Thread::Finish ()
 void
 Thread::Yield ()
 {
-    Thread *nextThread;
-    IntStatus oldLevel = interrupt->SetLevel (IntOff);
+    if(!FirstYield){
 
-    ASSERT (this == currentThread);
 
-    DEBUG ('t', "Yielding thread \"%s\"\n", getName ());
+      Thread *nextThread;
+      IntStatus oldLevel = interrupt->SetLevel (IntOff);
 
-    nextThread = scheduler->FindNextToRun ();
-    if (nextThread != NULL)
-      {
-	  scheduler->ReadyToRun (this);
-	  scheduler->Run (nextThread);
-      }
-    (void) interrupt->SetLevel (oldLevel);
+      ASSERT (this == currentThread);
+
+      DEBUG ('t', "Yielding thread \"%s\"\n", getName ());
+
+      nextThread = scheduler->FindNextToRun ();
+      if (nextThread != NULL)
+        {
+  	  scheduler->ReadyToRun (this);
+  	  scheduler->Run (nextThread);
+        }
+      (void) interrupt->SetLevel (oldLevel);
+      FirstYield = true;
+    }
+    else
+      FirstYield = false;
 }
 
 //----------------------------------------------------------------------

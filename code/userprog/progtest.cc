@@ -11,8 +11,11 @@
 #include "copyright.h"
 #include "system.h"
 #include "console.h"
+#include "synchconsole.h"
 #include "addrspace.h"
 #include "synch.h"
+#include "syscall.h"
+
 
 //----------------------------------------------------------------------
 // StartProcess
@@ -51,6 +54,7 @@ StartProcess (char *filename)
 static Console *console;
 static Semaphore *readAvail;
 static Semaphore *writeDone;
+//static SynchConsole *synchconsole;
 
 //----------------------------------------------------------------------
 // ConsoleInterruptHandlers
@@ -85,11 +89,39 @@ ConsoleTest (char *in, char *out)
 
     for (;;)
       {
-	  readAvail->P ();	// wait for character to arrive
-	  ch = console->GetChar ();
-	  console->PutChar (ch);	// echo it!
-	  writeDone->P ();	// wait for write to finish
-	  if (ch == 'q')
-	      return;		// if q, quit
+      readAvail->P ();  // wait for character to arrive
+      ch = console->GetChar ();
+      if(ch != '\n' && ch != EOF){
+        console->PutChar('<');
+        writeDone->P ();  
+        console->PutChar (ch);    // echo it!
+        writeDone->P ();  
+        console->PutChar('>');
+        writeDone->P ();  // wait for write to finish
       }
+      else{
+        console->PutChar('\n');
+        writeDone->P ();
+      }
+      if (ch == 'q' || ch == EOF )
+          return;       // if q, quit
+      }
+}
+
+
+void
+SynchConsoleTest (char *in, char *out)
+{
+    char ch;
+    synchconsole = new SynchConsole(in, out);
+    while ((ch = synchconsole->SynchGetChar()) != EOF){
+        if(ch != '\n'){
+            //synchconsole->SynchPutChar('<');
+            //synchconsole->SynchPutChar(ch);
+            //synchconsole->SynchPutChar('>');
+            const char* h = "hey"
+            synchconsole->SynchPutString(h);
+        }
+    }
+    fprintf(stderr, "Solaris: EOF detected in SynchConsole!\n");
 }

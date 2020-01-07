@@ -18,7 +18,7 @@ check:
 all: build
 
 build: bin
-	$(MAKE) -C $@
+	$(MAKE) -C  $@
 
 .PHONY: bin
 bin:

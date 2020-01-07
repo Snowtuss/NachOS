@@ -7,6 +7,7 @@
 
 #include "copyright.h"
 #include "system.h"
+#include "synchconsole.h"
 
 // This defines *all* of the global data structures used by Nachos.
 // These are all initialized and de-allocated by this file.
@@ -29,6 +30,7 @@ SynchDisk *synchDisk;
 
 #ifdef USER_PROGRAM		// requires either FILESYS or FILESYS_STUB
 Machine *machine;		// user program memory and registers
+SynchConsole *synchconsole;
 #endif
 
 #ifdef NETWORK
@@ -82,6 +84,7 @@ Initialize (int argc, char **argv)
     bool randomYield = FALSE;
 
 #ifdef USER_PROGRAM
+    
     bool debugUserProg = FALSE;	// single step user program
 #endif
 #ifdef FILESYS_NEEDED
@@ -114,6 +117,7 @@ Initialize (int argc, char **argv)
 		argCount = 2;
 	    }
 #ifdef USER_PROGRAM
+	  
 	  if (!strcmp (*argv, "-s"))
 	      debugUserProg = TRUE;
 #endif
@@ -156,6 +160,7 @@ Initialize (int argc, char **argv)
     CallOnUserAbort (Cleanup);	// if user hits ctl-C
 
 #ifdef USER_PROGRAM
+    synchconsole = new SynchConsole(NULL,NULL);
     machine = new Machine (debugUserProg);	// this must come first
 #endif
 
@@ -185,6 +190,7 @@ Cleanup ()
 #endif
 
 #ifdef USER_PROGRAM
+    delete synchconsole;
     delete machine;
 #endif
 
