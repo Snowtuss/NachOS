@@ -37,17 +37,12 @@ char SynchConsole::SynchGetChar()
 
 void SynchConsole::SynchPutString(const char s[])
 {
-	//Commented code works perfectly
-
-	/*int i=0;
+	int i=0;
 	while(s[i]!='\0') {
 		SynchPutChar(s[i]);
 		i++;
-	}*/
-
-	//end of commented code
-
-	copyStringFromMachine(machine->ReadRegister(4),(char*)s,MAX_STRING_SIZE);
+	}
+	
 }
 
 void SynchConsole::SynchGetString(char *s,int n)
