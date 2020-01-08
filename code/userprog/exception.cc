@@ -32,7 +32,8 @@
 // the user program immediately after the "syscall" instruction.
 //----------------------------------------------------------------------
 //static SynchConsole *sync;
-static Semaphore *readAvail;
+static Semaphore *readAvail = new Semaphore("read available", 0);;
+static Semaphore *writeDone = new Semaphore("write done", 0);
 static void
 UpdatePC ()
 {
@@ -94,36 +95,112 @@ void
 ExceptionHandler(ExceptionType which)
 {
 
-    int type = machine->ReadRegister(2);
-    readAvail = new Semaphore ("read avail", 0);
-    //sync = new SynchConsole(NULL,NULL);
-    /*if ((which == SyscallException) && (type == SC_Halt)) {
-        DEBUG(’a’, "Shutdown, initiated by user program.\n");
-        interrupt->Halt();
-    } else {
-        printf("Unexpected user mode exception %d %d\n", which, type);
-        ASSERT(FALSE);
-    }*/
-    if (which == SyscallException) {
-        switch (type) {
-        case SC_Halt: {
-            DEBUG('a', "Shutdown, initiated by user program.\n");
-            interrupt->Halt();
-        break;
-        }
-        case SC_PutChar: {
-            readAvail->V();
-            //printf("%c\n",(char)machine->ReadRegister(4));
-            synchconsole->SynchPutChar(machine->ReadRegister(4));
-            readAvail->P();
-        break;
-        }
-        default: {
-            printf("Unexpected user mode exception %d %d\n", which, type);
-            ASSERT(FALSE);
-        break;
-        }
-        }
-        UpdatePC();
+  int type = machine->ReadRegister(2);
+  readAvail = new Semaphore ("read avail", 0);
+  //sync = new SynchConsole(NULL,NULL);
+  /*if ((which == SyscallException) && (type == SC_Halt)) {
+      DEBUG(’a’, "Shutdown, initiated by user program.\n");
+      interrupt->Halt();
+  } else {
+      printf("Unexpected user mode exception %d %d\n", which, type);
+      ASSERT(FALSE);
+  }*/
+  if (which == SyscallException) {
+    switch (type) {
+    case SC_Halt: {
+      DEBUG('a', "Shutdown, initiated by user program.\n");
+      interrupt->Halt();
+      break;
     }
+    case SC_Exit: {
+      DEBUG('a', "Shutdown, initiated by user program.\n");
+      printf("\n\n*****The program was shutdown using a return n.*****\n");
+      interrupt->Halt();
+      break;
+    }
+    case SC_PutChar: {
+      readAvail->V();
+      //printf("%c\n",(char)machine->ReadRegister(4));
+      synchconsole->SynchPutChar(machine->ReadRegister(4));
+      readAvail->P();
+      break;
+    }
+    case SC_PutString: {
+      //char str[MAX_STRING_SIZE];
+      //printf("i got a SC_PutString call\n");
+      //readAvail->V();
+      char *str = (char *) malloc(MAX_STRING_SIZE*sizeof(char));
+      synchconsole->copyStringFromMachine(machine->ReadRegister(4),str,MAX_STRING_SIZE);
+      synchconsole->SynchPutString(str);
+      free(str);
+      //readAvail->P();
+      //printf("finished the SC_PutString call\n");
+      break;
+    }
+    case SC_GetChar: {
+      writeDone->V();
+      machine->WriteRegister(2,(int)synchconsole->SynchGetChar());
+      writeDone->P();
+      break;
+    }
+    /*case SC_GetString: {
+      printf("i got a SC_GetString call\n");
+      char *str = (char *) malloc(MAX_STRING_SIZE*sizeof(char));
+      synchconsole->SynchGetString(str, MAX_STRING_SIZE);
+      int i=0;
+
+      while(str[i] != '\0' && i<MAX_STRING_SIZE){
+       // writeDone->V();
+        machine->WriteRegister(2,(int)str[i]);
+        //writeDone->P();
+        i++;
+      }
+      
+      break;
+    }
+    */
+    case SC_GetString: {
+      char *str = (char *) malloc(MAX_STRING_SIZE*sizeof(char));
+      synchconsole->SynchGetString(str, MAX_STRING_SIZE);
+      //copyStringToMachine(str,machine->ReadRegister(4),machine->ReadRegister(5));
+      //synchconsole->copyStringFromMachine(str,machine->ReadRegister(4),machine->ReadRegister(5));
+      int i=0;
+      //int value;
+      while(str[i] != '\0' && i<MAX_STRING_SIZE-1){
+       // writeDone->V();
+        //value = str[i];
+        //machine->WriteRegister(2,(int)str[i]);
+        machine->WriteMem(machine->ReadRegister(4)+i,1,str[i]);
+        //writeDone->P();
+        i++;
+      }
+      //value='\0';
+      //machine->WriteMem(machine->ReadRegister(4)+i,1,value);
+      free(str);
+      break;
+    }
+    case SC_PutInt: {
+      //readAvail->V();
+      //printf("%c\n",(char)machine->ReadRegister(4));
+      synchconsole->SynchPutInt(machine->ReadRegister(4));
+      //readAvail->P();
+      break;
+    }
+    case SC_GetInt: {
+      //writeDone->V();
+     // machine->WriteRegister(4,(int)synchconsole->SynchGetInt());
+      //writeDone->P();
+       writeDone->V();
+      machine->WriteRegister(2,(int)synchconsole->SynchGetInt());
+      writeDone->P();
+      break;
+    }
+    default: {
+      printf("Unexpected user mode exception %d %d\n", which, type);
+      ASSERT(FALSE);
+      break;
+    }
+    }
+    UpdatePC();
+  }
 }

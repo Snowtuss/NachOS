@@ -18,18 +18,23 @@
 /* system call codes -- used by the stubs to tell the kernel which system call
  * is being asked for
  */
-#define SC_Halt		0
-#define SC_Exit		1
-#define SC_Exec		2
-#define SC_Join		3
-#define SC_Create	4
-#define SC_Open		5
-#define SC_Read		6
-#define SC_Write	7
-#define SC_Close	8
-#define SC_Fork		9
-#define SC_Yield	10
-#define SC_PutChar	11
+#define SC_Halt			0
+#define SC_Exit			1
+#define SC_Exec			2
+#define SC_Join			3
+#define SC_Create		4
+#define SC_Open			5
+#define SC_Read			6
+#define SC_Write		7
+#define SC_Close		8
+#define SC_Fork			9
+#define SC_Yield		10
+#define SC_PutChar		11
+#define SC_PutString	12
+#define SC_GetChar		13
+#define SC_GetString	14
+#define SC_PutInt		15
+#define SC_GetInt		16
 
 #ifdef IN_USER_MODE
 
@@ -46,6 +51,21 @@
  * are then invoked in the Nachos kernel, after appropriate error checking, 
  * from the system call entry point in exception.cc.
  */
+
+/* Get an int  */
+int GetInt();
+
+/* Print an int  */
+void PutInt(int n);
+
+/* Get a String  */
+char GetString(char s[], int n);
+
+/* Get a char  */
+int GetChar();
+
+/* Print a String  */
+void PutString(char *c);
 
 /* Print a char  */
 void PutChar(char c);
