@@ -40,6 +40,22 @@ __start:
  * 	convention on the MIPS.
  * -------------------------------------------------------------
  */
+ 	.globl UserThreadExit
+	.ent	UserThreadExit
+UserThreadExit:
+	addiu $2,$0,SC_UserThreadExit
+	syscall
+	j	$31
+	.end UserThreadExit
+
+ 	.globl UserThreadCreate
+	.ent	UserThreadCreate
+UserThreadCreate:
+	addiu $2,$0,SC_UserThreadCreate
+	syscall
+	j	$31
+	.end UserThreadCreate
+
  	.globl GetInt
 	.ent	GetInt
 GetInt:

@@ -26,6 +26,7 @@
 #include "syscall.h"
 #include "synchconsole.h"
 #include "synch.h"
+#include "userthread.h"
 
 //----------------------------------------------------------------------
 // UpdatePC : Increments the Program Counter register in order to resume
@@ -193,6 +194,15 @@ ExceptionHandler(ExceptionType which)
        writeDone->V();
       machine->WriteRegister(2,(int)synchconsole->SynchGetInt());
       writeDone->P();
+      break;
+    }
+    case SC_UserThreadCreate: {
+      int returnValue = UserThreadCreate(machine->ReadRegister(4),machine->ReadRegister(5));
+      machine->WriteRegister(2,returnValue);
+      break;
+    }
+    case SC_UserThreadExit: {
+      do_UserThreadExit();
       break;
     }
     default: {

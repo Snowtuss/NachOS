@@ -19,7 +19,7 @@
 #include "system.h"
 #include "addrspace.h"
 #include "noff.h"
-
+#include "bitmap.h"
 #include <strings.h>		/* for bzero */
 
 //----------------------------------------------------------------------
@@ -194,4 +194,10 @@ AddrSpace::RestoreState ()
 {
     machine->pageTable = pageTable;
     machine->pageTableSize = numPages;
+}
+
+int AddrSpace::StackAddr() {
+    BitMap *bitmapStack = new BitMap((int)(UserStackSize/(PagePerThread*PageSize)));
+    int find = bitmapStack->Find();
+    return (numPages*PageSize - find*PagePerThread*PageSize);
 }

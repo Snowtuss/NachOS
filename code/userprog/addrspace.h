@@ -17,6 +17,7 @@
 #include "filesys.h"
 
 #define UserStackSize		1024	// increase this as necessary!
+#define PagePerThread 4
 
 class AddrSpace
 {
@@ -31,7 +32,7 @@ class AddrSpace
 
     void SaveState ();		// Save/restore address space-specific
     void RestoreState ();	// info on a context switch 
-
+    int StackAddr();
   private:
       TranslationEntry * pageTable;	// Assume linear page table translation
     // for now!

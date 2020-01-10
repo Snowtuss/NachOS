@@ -5,11 +5,12 @@
 #include "utility.h"
 #include "machine.h"
 #include "addrspace.h"
+#include "bitmap.h"
 
-int UserThreadCreate(int f, int *arg);
+int UserThreadCreate(int f, int arg);
 void StartUserThread(int data);
-int UserThreadExit();
-int do_UserThreadExit(Thread *th);
+void do_UserThreadExit();
+int stackAddr();
 
 
 #endif

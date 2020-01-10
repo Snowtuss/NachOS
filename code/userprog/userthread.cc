@@ -3,7 +3,9 @@
 #include "switch.h"
 #include "synch.h"
 #include "system.h"
-#include "thread.h"
+#include "userthread.h"
+#include "bitmap.h"
+#include "addrspace.h"
 
 
 typedef struct{
@@ -20,9 +22,18 @@ void StartUserThread(int data) {
 
     currentThread->space->InitRegisters();
 	currentThread->space->RestoreState();
-	//Need to write f the function in some register, maybe PC ?
+	//Need to write f the function in some register, but which one ?
 	//machine->WriteRegister(4,fargs->arg);
 	machine->WriteRegister(4,fargs->arg);
+	machine->WriteRegister(PCReg,fargs->f);
+	fargs->f+=4;
+	machine->WriteRegister(NextPCReg,fargs->f);
+	//write the stack
+	machine->WriteRegister(StackReg,currentThread->space->StackAddr());
+	
+	
+	currentThread->Yield();
+	printf("\nUser Thread is doing alright !\n");
     machine->Run ();
 }
 
@@ -40,22 +51,22 @@ int UserThreadCreate(int f, int arg) {
 	 fargs->arg = arg;
 
 	 userthread->Fork(StartUserThread,(int)fargs);
+	 currentThread->Yield();
 	 return 0;
 
 }
 
-int do_UserThreadExit(Thread *th) {
+void do_UserThreadExit() {
 	//if(th->name() != "main"){
-		th->Finish();
-		return 0;
+		currentThread->Finish();
+		printf("User Thread Finished successfuly");
+	//	return 0;
 	//}
 	//else
 	//	return -1;
 }
 
-int UserThreadExit() {
-	return do_UserThreadExit(currentThread);
-}
+
 
 
 
