@@ -16,12 +16,14 @@
 #include "copyright.h"
 #include "filesys.h"
 
+
 #define UserStackSize		1024	// increase this as necessary!
-#define PagePerThread 4
+#define PagePerThread 2
 
 class AddrSpace
 {
   public:
+    
     AddrSpace (OpenFile * executable);	// Create an address space,
     // initializing it with the program
     // stored in the file "executable"
@@ -33,6 +35,10 @@ class AddrSpace
     void SaveState ();		// Save/restore address space-specific
     void RestoreState ();	// info on a context switch 
     int StackAddr();
+    //void LockEndMain();
+    //void FreeEndMain();
+    void FreeMapStack();
+    int userexitaddr;
   private:
       TranslationEntry * pageTable;	// Assume linear page table translation
     // for now!

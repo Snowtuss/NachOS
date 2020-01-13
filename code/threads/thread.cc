@@ -45,6 +45,7 @@ Thread::Thread (const char *threadName)
     // user threads.
     for (int r=NumGPRegs; r<NumTotalRegs; r++)
       userRegisters[r] = 0;
+  	idThread=0;
 #endif
 }
 
@@ -415,6 +416,16 @@ Thread::RestoreUserState ()
     for (int i = 0; i < NumTotalRegs; i++)
 	machine->WriteRegister (i, userRegisters[i]);
 }
+
+
+int Thread::GetIdThread() {
+	return idThread;
+}
+
+void Thread::SetIdThread(int id){
+	idThread = id;
+}
+
 #endif
 
 

@@ -122,6 +122,7 @@ class Thread
     ThreadStatus status;	// ready, running or blocked
     const char *name;
 
+
     void StackAllocate (VoidFunctionPtr func, int arg);
     // Allocate a stack for thread.
     // Used internally by Fork()
@@ -132,12 +133,14 @@ class Thread
 // while executing kernel code.
 
     int userRegisters[NumTotalRegs];	// user-level CPU register state
-
+    int idThread;
   public:
     void SaveUserState ();	// save user-level register state
     void RestoreUserState ();	// restore user-level register state
 
     AddrSpace *space;		// User code this thread is running.
+    int GetIdThread();
+    void SetIdThread(int id);
 #endif
 };
 

@@ -1,6 +1,6 @@
 #include "syscall.h"
 
-void affiche(int i) {
+void print(int i) {
 	PutInt(i);
 	UserThreadExit();
 }
@@ -8,9 +8,10 @@ void affiche(int i) {
 
 int main () {	
 	int i = 2;
-	void* f = affiche;
+	void* f = print;
     int res = UserThreadCreate(f,&i);
-    PutInt(6);
+    //PutString("Return value of Fork : ");
+    PutInt(res);
 
     return res;
 

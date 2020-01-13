@@ -26,15 +26,16 @@ void StartUserThread(int data) {
 	//machine->WriteRegister(4,fargs->arg);
 	machine->WriteRegister(4,fargs->arg);
 	machine->WriteRegister(PCReg,fargs->f);
-	fargs->f+=4;
-	machine->WriteRegister(NextPCReg,fargs->f);
+	//fargs->f+=4;
+	machine->WriteRegister(NextPCReg,fargs->f+4);
 	//write the stack
 	machine->WriteRegister(StackReg,currentThread->space->StackAddr());
+	//machine->WriteRegister(RetAddrReg, currentThread->space->userexitaddr);
 	
-	
-	currentThread->Yield();
+	//currentThread->Yield();
 	printf("\nUser Thread is doing alright !\n");
     machine->Run ();
+    
 }
 
 int UserThreadCreate(int f, int arg) {
@@ -44,26 +45,34 @@ int UserThreadCreate(int f, int arg) {
 	 	delete userthread;
 	 	return -1;
 	 }
-	 	
+	 //currentThread->space->userexitaddr = machine->ReadRegister(6);
 
 	 ForkArgs *fargs = new ForkArgs;
 	 fargs->f = f;
 	 fargs->arg = arg;
 
 	 userthread->Fork(StartUserThread,(int)fargs);
-	 currentThread->Yield();
+	 //currentThread->Yield();
 	 return 0;
 
 }
 
 void do_UserThreadExit() {
 	//if(th->name() != "main"){
-		currentThread->Finish();
-		printf("User Thread Finished successfuly");
+		//currentThread->Finish();
+		//printf("User Thread Finished successfuly");
 	//	return 0;
 	//}
 	//else
 	//	return -1;
+	//if(currentThread->GetIdThread() == 0)
+	//	return -1
+	//else{
+	//currentThread->space->FreeEndMain();
+	//fin du thread
+	currentThread->space->FreeMapStack();
+	currentThread->Finish ();
+	
 }
 
 

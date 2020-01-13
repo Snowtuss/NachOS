@@ -21,6 +21,7 @@
 #include "noff.h"
 #include "bitmap.h"
 #include <strings.h>		/* for bzero */
+#include "synch.h"
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -28,6 +29,9 @@
 //      object file header, in case the file was generated on a little
 //      endian machine, and we're now running on a big endian machine.
 //----------------------------------------------------------------------
+//Semaphore* lockEndMain;
+//static Semaphore *lockEndMain;
+BitMap *bitmapStack;
 
 static void
 SwapHeader (NoffHeader * noffH)
@@ -64,7 +68,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
 {
     NoffHeader noffH;
     unsigned int i, size;
-
+    bitmapStack = new BitMap(UserStackSize/(PagePerThread*PageSize));
     executable->ReadAt ((char *) &noffH, sizeof (noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) &&
 	(WordToHost (noffH.noffMagic) == NOFFMAGIC))
@@ -119,6 +123,8 @@ AddrSpace::AddrSpace (OpenFile * executable)
 			       [noffH.initData.virtualAddr]),
 			      noffH.initData.size, noffH.initData.inFileAddr);
       }
+      //lockEndMain = new Semaphore("lock at the end",0);
+       
 
 }
 
@@ -197,7 +203,21 @@ AddrSpace::RestoreState ()
 }
 
 int AddrSpace::StackAddr() {
-    BitMap *bitmapStack = new BitMap((int)(UserStackSize/(PagePerThread*PageSize)));
+   
     int find = bitmapStack->Find();
+    currentThread->SetIdThread(find);
     return (numPages*PageSize - find*PagePerThread*PageSize);
+}
+
+/*void AddrSpace::LockEndMain(){
+  lockEndMain->P();
+}
+
+void AddrSpace::FreeEndMain(){
+  lockEndMain->V();
+}
+*/
+
+void AddrSpace::FreeMapStack(){
+  bitmapStack->Clear(currentThread->GetIdThread());
 }
