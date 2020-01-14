@@ -73,6 +73,7 @@ Machine::Machine(bool debug)
 
     singleStep = debug;
     CheckEndian();
+    nbThreads=0;
 }
 
 //----------------------------------------------------------------------

@@ -19,8 +19,9 @@ void StartUserThread(int data) {
 	
 	//space = new AddrSpace (fargs->f);
     //currentThread->space = space;
-
+	machine->nbThreads+=1;
     currentThread->space->InitRegisters();
+
 	currentThread->space->RestoreState();
 	//Need to write f the function in some register, but which one ?
 	//machine->WriteRegister(4,fargs->arg);
@@ -33,13 +34,14 @@ void StartUserThread(int data) {
 	//machine->WriteRegister(RetAddrReg, currentThread->space->userexitaddr);
 	
 	//currentThread->Yield();
-	printf("\nUser Thread is doing alright !\n");
-    machine->Run ();
+	
+    machine->Run();
+    printf("\nUser Thread is doing alright !\n");
     
 }
 
 int UserThreadCreate(int f, int arg) {
-
+	
 	 Thread *userthread = new Thread("User thread");
 	 if (userthread == NULL){
 	 	delete userthread;
@@ -50,7 +52,7 @@ int UserThreadCreate(int f, int arg) {
 	 ForkArgs *fargs = new ForkArgs;
 	 fargs->f = f;
 	 fargs->arg = arg;
-
+	 
 	 userthread->Fork(StartUserThread,(int)fargs);
 	 //currentThread->Yield();
 	 return 0;
@@ -68,10 +70,15 @@ void do_UserThreadExit() {
 	//if(currentThread->GetIdThread() == 0)
 	//	return -1
 	//else{
-	//currentThread->space->FreeEndMain();
+
 	//fin du thread
+	printf("\nExiting User thread.\n");
 	currentThread->space->FreeMapStack();
+	currentThread->space->LockHalt();
 	currentThread->Finish ();
+	machine->nbThreads-=1;
+
+
 	
 }
 

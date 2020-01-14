@@ -1,18 +1,28 @@
 #include "syscall.h"
 
-void print(int i) {
-	PutInt(i);
+void print(int *i) {
+	PutInt((int)*i);
+	//PutString("USERTHREAD FUCNTION\n");
+	UserThreadExit();
+}
+
+void print2(char *c) {
+	PutString(c);
 	UserThreadExit();
 }
 
 
 int main () {	
-	int i = 2;
-	void* f = print;
-    int res = UserThreadCreate(f,&i);
+	//int i = 9;
+	//void * b = (void *) &i;
+	void* f = print2;
+	int res;
+    while(1)
+    //res= UserThreadCreate(f,b);
+	res= UserThreadCreate(f,"Test of String Thread\n");
     //PutString("Return value of Fork : ");
     PutInt(res);
-
-    return res;
+    //PutInt(i);
+    Halt();
 
 }
