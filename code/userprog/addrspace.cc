@@ -69,8 +69,8 @@ AddrSpace::AddrSpace (OpenFile * executable)
     NoffHeader noffH;
     unsigned int i, size;
 
-    bitmapStack = new BitMap(UserStackSize/(PagePerThread*PageSize));
-
+    bitmapStack = new BitMap((int)(UserStackSize/(PagePerThread*PageSize)));
+    bitmapStack->Mark(0);
     executable->ReadAt ((char *) &noffH, sizeof (noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) &&
 	(WordToHost (noffH.noffMagic) == NOFFMAGIC))
@@ -126,7 +126,8 @@ AddrSpace::AddrSpace (OpenFile * executable)
 			      noffH.initData.size, noffH.initData.inFileAddr);
       }
       
-      lockHalt = new Semaphore("lock at the end",0);
+      lockHalt = new Semaphore("lock at the end",1);
+      currentThread->space->LockHalt();
       
        
 
@@ -211,6 +212,7 @@ int AddrSpace::StackAddr() {
     int find = bitmapStack->Find();
     currentThread->SetIdThread(find);
     return (numPages*PageSize - find*PagePerThread*PageSize);
+    //return (numPages * PageSize - 16);
 }
 
 void AddrSpace::LockHalt(){
