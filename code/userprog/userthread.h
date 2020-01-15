@@ -7,7 +7,7 @@
 #include "addrspace.h"
 #include "bitmap.h"
 
-int UserThreadCreate(int f, int arg);
+int do_UserThreadCreate(int f, int arg);
 void StartUserThread(int data);
 void do_UserThreadExit();
 int stackAddr();

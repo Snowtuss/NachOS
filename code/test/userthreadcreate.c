@@ -13,15 +13,24 @@ void print2(char *c) {
 
 
 int main () {	
-	//int i = 9;
-	//void * b = (void *) &i;
-	void* f = print2;
+	int i = 9;
+
+	void * b = (void *) &i;
+	void* f = print;
+	void* f2 = print2;
 	int res;
-    while(1)
-    //res= UserThreadCreate(f,b);
-	res= UserThreadCreate(f,"Test of String Thread\n");
-    //PutString("Return value of Fork : ");
+	int res2;
+    //while(1)
+    res= UserThreadCreate(f,b);
+
     PutInt(res);
+	res2= UserThreadCreate(f2,"Test of String Thread\n");
+
+	res2= UserThreadCreate(f2,"Test of String Thread2\n");
+	res2= UserThreadCreate(f2,"Test of String Thread3\n");
+    //PutString("Return value of Fork : ");
+    
+    PutInt(res2);
     //PutInt(i);
     Halt();
 

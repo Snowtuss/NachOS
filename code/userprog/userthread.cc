@@ -20,27 +20,33 @@ void StartUserThread(int data) {
 	//space = new AddrSpace (fargs->f);
     //currentThread->space = space;
 	machine->nbThreads+=1;
+	
     currentThread->space->InitRegisters();
 
 	currentThread->space->RestoreState();
 	//Need to write f the function in some register, but which one ?
 	//machine->WriteRegister(4,fargs->arg);
-	machine->WriteRegister(4,fargs->arg);
-	machine->WriteRegister(PCReg,fargs->f);
+	
+	ASSERT(fargs!=NULL);
+	ASSERT(fargs->f!=0);
+	ASSERT(fargs->arg!=0);
 	//fargs->f+=4;
+	machine->WriteRegister(4,(int)fargs->arg);
 	machine->WriteRegister(NextPCReg,fargs->f+4);
+	machine->WriteRegister(PCReg,(int)fargs->f);
 	//write the stack
-	machine->WriteRegister(StackReg,currentThread->space->StackAddr());
+	machine->WriteRegister(StackReg,(int)currentThread->space->StackAddr());
+	//printf("\n*************machine->nbThreads at StartUserThread = %d for Thread id %d*************\n",machine->nbThreads,currentThread->GetIdThread());
 	//machine->WriteRegister(RetAddrReg, currentThread->space->userexitaddr);
 	
 	//currentThread->Yield();
 	
     machine->Run();
-    printf("\nUser Thread is doing alright !\n");
+    //printf("\nUser Thread is doing alright !\n");
     
 }
 
-int UserThreadCreate(int f, int arg) {
+int do_UserThreadCreate(int f, int arg) {
 	
 	 Thread *userthread = new Thread("User thread");
 	 if (userthread == NULL){
@@ -48,11 +54,13 @@ int UserThreadCreate(int f, int arg) {
 	 	return -1;
 	 }
 	 //currentThread->space->userexitaddr = machine->ReadRegister(6);
+	 //if(currentThread->GetIdThread() == 0)
+         //currentThread->space->LockHalt();
 
 	 ForkArgs *fargs = new ForkArgs;
 	 fargs->f = f;
 	 fargs->arg = arg;
-	 
+	 //printf("machine->nbThreads at creation = %d\n",machine->nbThreads);
 	 userthread->Fork(StartUserThread,(int)fargs);
 	 //currentThread->Yield();
 	 return 0;
@@ -72,11 +80,16 @@ void do_UserThreadExit() {
 	//else{
 
 	//fin du thread
-	printf("\nExiting User thread.\n");
+	//printf("\n-----------Exiting User thread of thread %d.-----------\n", currentThread->GetIdThread());
 	currentThread->space->FreeMapStack();
-	currentThread->space->LockHalt();
-	currentThread->Finish ();
+	
+	//if(machine->nbThreads==0)
+	currentThread->space->UnlockHalt();
 	machine->nbThreads-=1;
+	//printf("machine->nbThreads at EXIT = %d",machine->nbThreads);
+	currentThread->Finish ();
+	
+	
 
 
 	

@@ -17,7 +17,7 @@
 #include "filesys.h"
 
 
-#define UserStackSize		1024	// increase this as necessary!
+#define UserStackSize		2024	// increase this as necessary!
 #define PagePerThread 2
 
 class AddrSpace
@@ -37,6 +37,8 @@ class AddrSpace
     int StackAddr();
     void LockHalt();
     void UnlockHalt();
+    void LockThread();
+    void UnlockThread();
     void FreeMapStack();
 
     int userexitaddr;

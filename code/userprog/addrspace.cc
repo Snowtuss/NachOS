@@ -31,6 +31,7 @@
 //----------------------------------------------------------------------
 //Semaphore* lockEndMain;
 static Semaphore *lockHalt;
+static Semaphore *lockThread;
 BitMap *bitmapStack;
 
 static void
@@ -126,8 +127,9 @@ AddrSpace::AddrSpace (OpenFile * executable)
 			      noffH.initData.size, noffH.initData.inFileAddr);
       }
       
-      lockHalt = new Semaphore("lock at the end",1);
-      currentThread->space->LockHalt();
+      lockHalt = new Semaphore("lock at the end",0);
+      lockThread = new Semaphore("lock at the end",0);
+      //currentThread->space->LockHalt();
       
        
 
@@ -221,6 +223,14 @@ void AddrSpace::LockHalt(){
 
 void AddrSpace::UnlockHalt(){
   lockHalt->V();
+}
+
+void AddrSpace::LockThread(){
+  lockThread->P();
+}
+
+void AddrSpace::UnlockThread(){
+  lockThread->V();
 }
 
 

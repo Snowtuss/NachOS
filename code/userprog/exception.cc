@@ -110,9 +110,11 @@ ExceptionHandler(ExceptionType which)
     switch (type) {
     case SC_Halt: {
       DEBUG('a', "Shutdown, initiated by user program.\n");
-      /*while(machine->nbThreads>0)
-          currentThread->space->LockHalt();
-       */
+     // while(machine->nbThreads>0 && currentThread->GetIdThread() == 0)
+          //currentThread->space->LockHalt();
+        while(machine->nbThreads>2) //printf("hey");
+            currentThread->space->LockHalt();
+          //printf("\nhey------------------\n");
         interrupt->Halt();
       break;
     }
@@ -200,7 +202,7 @@ ExceptionHandler(ExceptionType which)
       break;
     }
     case SC_UserThreadCreate: {
-      int returnValue = UserThreadCreate(machine->ReadRegister(4),machine->ReadRegister(5));
+      int returnValue = do_UserThreadCreate(machine->ReadRegister(4),machine->ReadRegister(5));
       machine->WriteRegister(2,returnValue);
       break;
     }
