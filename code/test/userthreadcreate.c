@@ -24,10 +24,16 @@ int main () {
     res= UserThreadCreate(f,b);
 
     PutInt(res);
+    UserThreadJoin(1);
 	res2= UserThreadCreate(f2,"Test of String Thread\n");
-
+	//UserThreadJoin(2);
+	UserThreadJoin(1);
 	res2= UserThreadCreate(f2,"Test of String Thread2\n");
+	UserThreadJoin(1);
+	//UserThreadJoin(3);
 	res2= UserThreadCreate(f2,"Test of String Thread3\n");
+	UserThreadJoin(1);
+	//UserThreadJoin(4);
     //PutString("Return value of Fork : ");
     
     PutInt(res2);

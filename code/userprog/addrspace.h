@@ -37,8 +37,8 @@ class AddrSpace
     int StackAddr();
     void LockHalt();
     void UnlockHalt();
-    void LockThread();
-    void UnlockThread();
+    void LockThread(int idThread);
+    void UnlockThread(int idThread);
     void FreeMapStack();
 
     int userexitaddr;

@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------
 //Semaphore* lockEndMain;
 static Semaphore *lockHalt;
-static Semaphore *lockThread;
+static Semaphore *lockThread[(UserStackSize/(PagePerThread*PageSize))];
 BitMap *bitmapStack;
 
 static void
@@ -127,8 +127,9 @@ AddrSpace::AddrSpace (OpenFile * executable)
 			      noffH.initData.size, noffH.initData.inFileAddr);
       }
       
-      lockHalt = new Semaphore("lock at the end",0);
-      lockThread = new Semaphore("lock at the end",0);
+      lockHalt = new Semaphore("lock main's halt",0);
+      for(i=0;i<(UserStackSize/(PagePerThread*PageSize));i++)
+        lockThread[i] = new Semaphore("lock a user thread",0);
       //currentThread->space->LockHalt();
       
        
@@ -225,12 +226,12 @@ void AddrSpace::UnlockHalt(){
   lockHalt->V();
 }
 
-void AddrSpace::LockThread(){
-  lockThread->P();
+void AddrSpace::LockThread(int idThread){
+  lockThread[idThread]->P();
 }
 
-void AddrSpace::UnlockThread(){
-  lockThread->V();
+void AddrSpace::UnlockThread(int idThread){
+  lockThread[idThread]->V();
 }
 
 

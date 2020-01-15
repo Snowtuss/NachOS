@@ -10,6 +10,7 @@
 int do_UserThreadCreate(int f, int arg);
 void StartUserThread(int data);
 void do_UserThreadExit();
+void do_UserThreadJoin(int idThread);
 int stackAddr();
 
 

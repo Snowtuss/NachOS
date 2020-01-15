@@ -86,6 +86,7 @@ void do_UserThreadExit() {
 	//if(machine->nbThreads==0)
 	currentThread->space->UnlockHalt();
 	machine->nbThreads-=1;
+	currentThread->space->UnlockThread(currentThread->GetIdThread());
 	//printf("machine->nbThreads at EXIT = %d",machine->nbThreads);
 	currentThread->Finish ();
 	
@@ -93,6 +94,11 @@ void do_UserThreadExit() {
 
 
 	
+}
+
+
+void do_UserThreadJoin(int idThread){
+	currentThread->space->LockThread(idThread);
 }
 
 

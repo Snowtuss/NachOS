@@ -37,6 +37,7 @@
 #define SC_GetInt			16
 #define SC_UserThreadCreate 17
 #define SC_UserThreadExit 	18
+#define SC_UserThreadJoin 	19
 
 #ifdef IN_USER_MODE
 
@@ -54,6 +55,9 @@
  * from the system call entry point in exception.cc.
  */
  
+/* put threads on wait */
+void UserThreadJoin();
+
 /* exit a user thread */
 void UserThreadExit();
 

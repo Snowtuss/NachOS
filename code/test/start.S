@@ -40,6 +40,16 @@ __start:
  * 	convention on the MIPS.
  * -------------------------------------------------------------
  */
+
+  	.globl UserThreadJoin
+	.ent	UserThreadJoin
+UserThreadJoin:
+	addiu $2,$0,SC_UserThreadJoin
+	syscall
+	j	$31
+	.end UserThreadJoin
+
+
  	.globl UserThreadExit
 	.ent	UserThreadExit
 UserThreadExit:
