@@ -238,3 +238,13 @@ void AddrSpace::UnlockThread(int idThread){
 void AddrSpace::FreeMapStack(){
   bitmapStack->Clear(currentThread->GetIdThread());
 }
+
+void ReadAtVirtual( OpenFile *executable, int virtualaddr,int numBytes, int position,
+                            TranslationEntry *pageTable,unsigned numPages) {
+
+    NoffHeader temp;
+    executable->ReadAt((char *) &temp, sizeof (temp), 0);
+    machine->pageTable = pageTable;
+    machine->pageTableSize = numPages;
+    machine->WriteMem(position,1,(int)(&temp));
+}
