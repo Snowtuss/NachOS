@@ -112,7 +112,7 @@ ExceptionHandler(ExceptionType which)
       DEBUG('a', "Shutdown, initiated by user program.\n");
      // while(machine->nbThreads>0 && currentThread->GetIdThread() == 0)
           //currentThread->space->LockHalt();
-        while(machine->nbThreads>2) //printf("hey");
+        while(machine->nbThreads>0) //printf("hey");
             currentThread->space->LockHalt();
           //printf("\nhey------------------\n");
         interrupt->Halt();
