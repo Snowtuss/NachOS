@@ -40,7 +40,7 @@ class AddrSpace
     void LockThread(int idThread);
     void UnlockThread(int idThread);
     void FreeMapStack();
-
+    
     int userexitaddr;
   private:
       TranslationEntry * pageTable;	// Assume linear page table translation
@@ -48,5 +48,7 @@ class AddrSpace
     unsigned int numPages;	// Number of pages in the virtual 
     // address space
 };
+
+
 
 #endif // ADDRSPACE_H

@@ -34,6 +34,20 @@ static Semaphore *lockHalt;
 static Semaphore *lockThread[(UserStackSize/(PagePerThread*PageSize))];
 BitMap *bitmapStack;
 
+void ReadAtVirtual( OpenFile *executable, int virtualaddr,int numBytes, int position,
+                            TranslationEntry *pageTable,unsigned numPages) {
+
+    char temp[numBytes];
+    int size;
+    size = executable->ReadAt(temp, numBytes, position);
+    machine->pageTable = pageTable;
+    machine->pageTableSize = numPages;
+    int i;
+    for(i=0;i<size;i++) {
+        machine->WriteMem(virtualaddr+i, 1, temp[i]);
+    }
+}
+
 static void
 SwapHeader (NoffHeader * noffH)
 {
@@ -72,7 +86,10 @@ AddrSpace::AddrSpace (OpenFile * executable)
 
     bitmapStack = new BitMap((int)(UserStackSize/(PagePerThread*PageSize)));
     bitmapStack->Mark(0);
+
     executable->ReadAt ((char *) &noffH, sizeof (noffH), 0);
+
+
     if ((noffH.noffMagic != NOFFMAGIC) &&
 	(WordToHost (noffH.noffMagic) == NOFFMAGIC))
 	SwapHeader (&noffH);
@@ -96,7 +113,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
     for (i = 0; i < numPages; i++)
       {
 	  pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	  pageTable[i].physicalPage = i;
+	  pageTable[i].physicalPage = i+1;
 	  pageTable[i].valid = TRUE;
 	  pageTable[i].use = FALSE;
 	  pageTable[i].dirty = FALSE;
@@ -114,17 +131,15 @@ AddrSpace::AddrSpace (OpenFile * executable)
       {
 	  DEBUG ('a', "Initializing code segment, at 0x%x, size %d\n",
 		 noffH.code.virtualAddr, noffH.code.size);
-	  executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),
-			      noffH.code.size, noffH.code.inFileAddr);
+	  //executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),noffH.code.size, noffH.code.inFileAddr);
+     ReadAtVirtual(executable,noffH.code.virtualAddr,noffH.code.size,noffH.code.inFileAddr,pageTable,numPages);
       }
     if (noffH.initData.size > 0)
       {
 	  DEBUG ('a', "Initializing data segment, at 0x%x, size %d\n",
 		 noffH.initData.virtualAddr, noffH.initData.size);
-	  executable->ReadAt (&
-			      (machine->mainMemory
-			       [noffH.initData.virtualAddr]),
-			      noffH.initData.size, noffH.initData.inFileAddr);
+	 // executable->ReadAt (&(machine->mainMemory[noffH.initData.virtualAddr]),noffH.initData.size, noffH.initData.inFileAddr);
+      ReadAtVirtual(executable,noffH.initData.virtualAddr,noffH.initData.size,noffH.initData.inFileAddr,pageTable,numPages);
       }
       
       lockHalt = new Semaphore("lock main's halt",0);
@@ -237,14 +252,4 @@ void AddrSpace::UnlockThread(int idThread){
 
 void AddrSpace::FreeMapStack(){
   bitmapStack->Clear(currentThread->GetIdThread());
-}
-
-void ReadAtVirtual( OpenFile *executable, int virtualaddr,int numBytes, int position,
-                            TranslationEntry *pageTable,unsigned numPages) {
-
-    NoffHeader temp;
-    executable->ReadAt((char *) &temp, sizeof (temp), 0);
-    machine->pageTable = pageTable;
-    machine->pageTableSize = numPages;
-    machine->WriteMem(position,1,(int)(&temp));
 }
