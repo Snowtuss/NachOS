@@ -22,6 +22,7 @@
 #include "bitmap.h"
 #include <strings.h>		/* for bzero */
 #include "synch.h"
+#include "frameprovider.h"
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -33,6 +34,7 @@
 static Semaphore *lockHalt;
 static Semaphore *lockThread[(UserStackSize/(PagePerThread*PageSize))];
 BitMap *bitmapStack;
+FrameProvider *fp;
 
 void ReadAtVirtual( OpenFile *executable, int virtualaddr,int numBytes, int position,
                             TranslationEntry *pageTable,unsigned numPages) {
@@ -83,8 +85,8 @@ AddrSpace::AddrSpace (OpenFile * executable)
 {
     NoffHeader noffH;
     unsigned int i, size;
-
     bitmapStack = new BitMap((int)(UserStackSize/(PagePerThread*PageSize)));
+    fp = new FrameProvider((int)(MemorySize/PageSize));
     bitmapStack->Mark(0);
 
     executable->ReadAt ((char *) &noffH, sizeof (noffH), 0);
@@ -113,7 +115,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
     for (i = 0; i < numPages; i++)
       {
 	  pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	  pageTable[i].physicalPage = i+1;
+	  pageTable[i].physicalPage = fp->GetEmptyFrame(TRUE);
 	  pageTable[i].valid = TRUE;
 	  pageTable[i].use = FALSE;
 	  pageTable[i].dirty = FALSE;
@@ -161,6 +163,7 @@ AddrSpace::~AddrSpace ()
   // LB: Missing [] for delete
   // delete pageTable;
   delete [] pageTable;
+  delete fp;
   // End of modification
 }
 
