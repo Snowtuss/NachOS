@@ -214,6 +214,9 @@ ExceptionHandler(ExceptionType which)
       do_UserThreadJoin(machine->ReadRegister(4));
       break;
     }
+    case SC_ForkExec: {
+      break;
+    }
     default: {
       printf("Unexpected user mode exception %d %d\n", which, type);
       ASSERT(FALSE);
