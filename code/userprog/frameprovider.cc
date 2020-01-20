@@ -1,30 +1,38 @@
-#include "copyright.h"
-#include "system.h"
-#include "bitmap.h"
 #include "frameprovider.h"
-
 
 FrameProvider::FrameProvider(int size)
 {
-	
+	bitmapFrame = new BitMap(size);
 }
 
 FrameProvider::~FrameProvider()
 {
-
+	delete bitmapFrame;
 }
 
-void SynchConsole::GetEmptyFrame()
+int FrameProvider::GetEmptyFrame(bool randomness)
 {
 
+	int tempFrame;
+	tempFrame = bitmapFrame->Find();
+	if(randomness){
+		do
+			tempFrame = rand() % ((int)(MemorySize/PageSize)) + 1;
+		while(tempFrame > NumAvailFrame());
+	}
+	//bzero(tempFrame, sizeof(int));
+	bzero (machine->mainMemory, MemorySize);
+	bitmapFrame->Mark(tempFrame);
+	//printf("\n==================TEMPFRAME = %d==================\n", tempFrame);
+	return tempFrame;
 }
 
-void SynchConsole::ReleaseFrame()
+void FrameProvider::ReleaseFrame(int byte)
 {
-
+	bitmapFrame->Clear(byte);
 }
 
-void SynchConsole::NumAvailFrame()
+int FrameProvider::NumAvailFrame()
 {
-
+	return bitmapFrame->NumClear();
 }
