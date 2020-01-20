@@ -38,6 +38,7 @@
 #define SC_UserThreadCreate 17
 #define SC_UserThreadExit 	18
 #define SC_UserThreadJoin 	19
+#define SC_ForkExec 	20
 
 #ifdef IN_USER_MODE
 
@@ -54,7 +55,13 @@
  * are then invoked in the Nachos kernel, after appropriate error checking, 
  * from the system call entry point in exception.cc.
  */
- 
+
+
+/* crée un thread au niveau du système Nachos et lance l’exécution du programme propulsée par ce thread,
+en parallèle avec le programme courant */
+
+int ForkExec(char *s);
+
 /* put threads on wait */
 void UserThreadJoin();
 
