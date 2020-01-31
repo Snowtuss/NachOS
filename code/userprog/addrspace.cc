@@ -233,9 +233,11 @@ AddrSpace::RestoreState ()
 }
 
 
+//Fonction qui alloue et renvoie le premier byte libre dans la bitmap et le définit comme id de thread.
+
 int AddrSpace::TidAllocator() {
   lockStack->P();
-  //return bitmapStack->Find();
+  
   if(bitmapStack->NumClear()<=0)
     return -1;
   int find = bitmapStack->Find();
@@ -251,44 +253,48 @@ int AddrSpace::TidAllocator() {
   return find;
 }
 
-
+//Fonction qui renvoie l'addresse de la pile du thread
 int AddrSpace::StackAddr() {
-   
-    //int find = bitmapStack->Find();
-    //currentThread->SetIdThread(find);
+
     return (numPages*PageSize - 16 - currentThread->GetIdThread()*PagePerThread*PageSize);
-    //return (numPages * PageSize - 16);
+    
 }
 
+//Fonction qui nous permets de lock notre verrou de main
 void AddrSpace::LockHalt(){
   lockHalt->P();
 }
 
+//Fonction qui nous permets d'unlock notre verrou de main
 void AddrSpace::UnlockHalt(){
   lockHalt->V();
 }
 
+//Fonction qui nous permets de lock notre verrou de thread qu'on va utiliser dans les sections critiques
 void AddrSpace::LockThread(int idThread){
   lockThread[idThread]->P();
 }
 
+//Fonction qui nous permets d'unlock notre verrou de main
 void AddrSpace::UnlockThread(int idThread){
   lockThread[idThread]->V();
 }
 
-
+//Fonction qui désaloue un byte dans notre bitmap
 void AddrSpace::FreeMapStack(){
   bitmapStack->Clear(currentThread->GetIdThread());
   nbThreadAccess->P();
+  //On décrémente le nombre de threads vu qu'un vient de se finir
   currentThread->space->UpdateNbThreads(-1);
   nbThreadAccess->V();
 }
 
-
+//Fonction qui incrémente le nombre de threads de n
 void AddrSpace::UpdateNbThreads(int n){
   nbThreads+=n;
 }
 
+//Fonction qui renvoie le nombre de threads
 int AddrSpace::GetNbThreads(){
   return nbThreads;
 }

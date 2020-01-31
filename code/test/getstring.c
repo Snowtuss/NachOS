@@ -8,5 +8,5 @@ int main(){
 	PutString(str);
 	PutChar('\n');
 	//PutChar('a');
-	Halt();
+	Exit(0);
 }
