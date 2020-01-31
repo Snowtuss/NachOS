@@ -1,22 +1,25 @@
 #include "syscall.h"
 
-#define THIS "aaa"
-#define THAT "bbb"
 
-const int N = 10; // Choose it large enough!
-
-void puts(char *s){
-	char *p; for (p = s; *p != '\0'; p++) PutChar(*p);
+void print(char *c) {
+	int i;
+	for(i=0;i<4;i++)
+	PutString(c);
+	UserThreadExit();
 }
 
-void f(void *s){
-	int i; 
-	for (i = 0; i < N; i++) 
-		puts((char *)s);
-}
+int main () {	
 
-int main(){
-	UserThreadCreate(f, (void *) THIS);
-	f((void*) THAT);
-	Halt();
+
+	void* f2 = print;
+
+	int res2;
+	res2= UserThreadCreate(f2,"cccccc");
+
+	//UserThreadJoin(res2);
+    //print("bbb");
+    PutInt(res2);
+    
+    Exit(0);
+
 }

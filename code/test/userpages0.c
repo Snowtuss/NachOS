@@ -10,13 +10,13 @@ int main () {
 
 	void* f = print;
 	int res;
-	int res2;
+	//int res2;
     res = UserThreadCreate(f,"<h><e><l><l><o>\n");
-    UserThreadJoin(1);
-	res2 = UserThreadCreate(f,"<f><r><i><e><n><d>\n");
-	UserThreadJoin(1);
+    //UserThreadJoin(1);
+	//res2 = UserThreadCreate(f,"<f><r><i><e><n><d>\n");
+	//UserThreadJoin(1);
 	PutInt(res);
-	PutInt(res2);
-	Halt();
+	//PutInt(res2);
+	Exit(0);
 
 }

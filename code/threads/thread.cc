@@ -20,9 +20,9 @@
 #include "synch.h"
 #include "system.h"
 
-#define STACK_FENCEPOST 0xdeadbeef	// this is put at the top of the
-					// execution stack, for detecting 
-					// stack overflows
+#define STACK_FENCEPOST 0xdeadbeef  // this is put at the top of the
+          // execution stack, for detecting 
+          // stack overflows
 
 //----------------------------------------------------------------------
 // Thread::Thread
@@ -45,7 +45,7 @@ Thread::Thread (const char *threadName)
     // user threads.
     for (int r=NumGPRegs; r<NumTotalRegs; r++)
       userRegisters[r] = 0;
-  	idThread=0;
+    idThread=0;
 #endif
 }
 
@@ -67,7 +67,7 @@ Thread::~Thread ()
 
     ASSERT (this != currentThread);
     if (stack != NULL)
-	DeallocBoundedArray ((char *) stack, StackSize * sizeof (int));
+  DeallocBoundedArray ((char *) stack, StackSize * sizeof (int));
 }
 
 //----------------------------------------------------------------------
@@ -94,7 +94,7 @@ void
 Thread::Fork (VoidFunctionPtr func, int arg)
 {
     DEBUG ('t', "Forking thread \"%s\" with func = 0x%x, arg = %d\n",
-	   name, (int) func, arg);
+     name, (int) func, arg);
 
     StackAllocate (func, arg);
 
@@ -111,7 +111,7 @@ Thread::Fork (VoidFunctionPtr func, int arg)
 #endif // USER_PROGRAM
 
     IntStatus oldLevel = interrupt->SetLevel (IntOff);
-    scheduler->ReadyToRun (this);	// ReadyToRun assumes that interrupts 
+    scheduler->ReadyToRun (this); // ReadyToRun assumes that interrupts 
     // are disabled!
     (void) interrupt->SetLevel (oldLevel);
 }
@@ -135,10 +135,10 @@ void
 Thread::CheckOverflow ()
 {
     if (stack != NULL)
-#ifdef HOST_SNAKE		// Stacks grow upward on the Snakes
-	ASSERT (stack[StackSize - 1] == STACK_FENCEPOST);
+#ifdef HOST_SNAKE   // Stacks grow upward on the Snakes
+  ASSERT (stack[StackSize - 1] == STACK_FENCEPOST);
 #else
-	ASSERT (*stack == (int) STACK_FENCEPOST);
+  ASSERT (*stack == (int) STACK_FENCEPOST);
 #endif
 }
 
@@ -172,7 +172,7 @@ Thread::Finish ()
     // End of addition 
 
     threadToBeDestroyed = currentThread;
-    Sleep ();			// invokes SWITCH
+    Sleep ();     // invokes SWITCH
     // not reached
 }
 
@@ -210,8 +210,8 @@ Thread::Yield ()
       nextThread = scheduler->FindNextToRun ();
       if (nextThread != NULL)
         {
-  	  scheduler->ReadyToRun (this);
-  	  scheduler->Run (nextThread);
+      scheduler->ReadyToRun (this);
+      scheduler->Run (nextThread);
         }
       (void) interrupt->SetLevel (oldLevel);
       FirstYield = true;
@@ -251,9 +251,9 @@ Thread::Sleep ()
 
     status = BLOCKED;
     while ((nextThread = scheduler->FindNextToRun ()) == NULL)
-	interrupt->Idle ();	// no one to run, wait for an interrupt
+  interrupt->Idle (); // no one to run, wait for an interrupt
 
-    scheduler->Run (nextThread);	// returns when we've been signalled
+    scheduler->Run (nextThread);  // returns when we've been signalled
 }
 
 //----------------------------------------------------------------------
@@ -307,10 +307,10 @@ SetupThreadState ()
   // running together.
 
   if (currentThread->space != NULL)
-    {				// if there is an address space
+    {       // if there is an address space
       // LB: Actually, the user state is void at that time. Keep this
       // action for consistency with the Scheduler::Run function
-      currentThread->RestoreUserState ();	// to restore, do it.
+      currentThread->RestoreUserState (); // to restore, do it.
       currentThread->space->RestoreState ();
     }
 
@@ -349,7 +349,7 @@ Thread::StackAllocate (VoidFunctionPtr func, int arg)
 
 #ifdef HOST_SNAKE
     // HP stack works from low addresses to high addresses
-    stackTop = stack + 16;	// HP requires 64-byte frame marker
+    stackTop = stack + 16;  // HP requires 64-byte frame marker
     stack[StackSize - 1] = STACK_FENCEPOST;
 #else
     // i386 & MIPS & SPARC stack works from high addresses to low addresses
@@ -357,7 +357,7 @@ Thread::StackAllocate (VoidFunctionPtr func, int arg)
     // SPARC stack must contains at least 1 activation record to start with.
     stackTop = stack + StackSize - 96;
 #else // HOST_MIPS  || HOST_i386
-    stackTop = stack + StackSize - 4;	// -4 to be on the safe side!
+    stackTop = stack + StackSize - 4; // -4 to be on the safe side!
 #ifdef HOST_i386
     // the 80386 passes the return address on the stack.  In order for
     // SWITCH() to go to ThreadRoot when we switch to this thread, the
@@ -398,7 +398,7 @@ void
 Thread::SaveUserState ()
 {
     for (int i = 0; i < NumTotalRegs; i++)
-	userRegisters[i] = machine->ReadRegister (i);
+  userRegisters[i] = machine->ReadRegister (i);
 }
 
 //----------------------------------------------------------------------
@@ -414,16 +414,16 @@ void
 Thread::RestoreUserState ()
 {
     for (int i = 0; i < NumTotalRegs; i++)
-	machine->WriteRegister (i, userRegisters[i]);
+  machine->WriteRegister (i, userRegisters[i]);
 }
 
 
 int Thread::GetIdThread() {
-	return idThread;
+  return idThread;
 }
 
 void Thread::SetIdThread(int id){
-	idThread = id;
+  idThread = id;
 }
 
 #endif

@@ -1,12 +1,15 @@
 #include "syscall.h"
 
 int main(){
-	int returnFork0,returnFork1;
-	returnFork0 = ForkExec("../test/userpages0");
-	returnFork1 = ForkExec("../test/userpages1");
-	PutInt(returnFork0);
-	PutChar('\n');
-	PutInt(returnFork1);
-	return 0;
+	//int returnFork0,returnFork1;
+	//ForkExec("../build/userpages0");
+	//ForkExec("../build/userthreadcreate");
+	ForkExec("../build/userpages0");
+	//ForkExec("../build/userthreadcreate");
+	//returnFork1 = ForkExec("../build/userthreadcreate");
+	//PutInt(returnFork0);
+	//PutChar('\n');
+	//PutInt(returnFork1);
+	Exit(0);
 }
 

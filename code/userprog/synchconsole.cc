@@ -2,15 +2,13 @@
 #include "system.h"
 #include "synchconsole.h"
 #include "synch.h"
+#include "console.h"
 
 static Semaphore *readAvail;
 static Semaphore *writeDone;
-static Semaphore *putSem;
-
-static Semaphore *writeChar;
-static Semaphore *readChar;
-static Semaphore *writeString;
-static Semaphore *readString;
+static Semaphore *SemPut;
+static Semaphore *SemGetChar;
+static Semaphore *SemGetString;
 
 static void ReadAvail(int arg) { readAvail->V(); }
 static void WriteDone(int arg) { writeDone->V(); }
@@ -19,18 +17,11 @@ SynchConsole::SynchConsole(char *readFile, char *writeFile)
 {
 	readAvail = new Semaphore("read avail", 0);
 	writeDone = new Semaphore("write done", 0);
-	putSem = new Semaphore("write done", 0);
-	putSem->V();
+	console = new Console (readFile, writeFile, ReadAvail, WriteDone, 0);
 
-
-
-	writeChar = new Semaphore("write char",1);
-	readChar = new Semaphore("read char",1);
-
-	writeString = new Semaphore("write string",1);
-	readString = new Semaphore("read string",1);
-
-	console = new Console(readFile,writeFile,ReadAvail,WriteDone,0);
+	SemPut = new Semaphore("Put", 1);
+	SemGetChar = new Semaphore("GetChar", 1);
+	SemGetString = new Semaphore("GetString", 1);
 }
 
 SynchConsole::~SynchConsole()
@@ -42,80 +33,96 @@ SynchConsole::~SynchConsole()
 
 void SynchConsole::SynchPutChar(const char ch)
 {
-	writeChar->P();
-
-	console->PutChar(ch);
-	writeDone->P();
-
-	writeChar->V();
+	SemPut->P();
+	console->PutChar (ch);
+	writeDone->P ();	// wait for write to finish
+	SemPut->V();
 }
 
-int SynchConsole::SynchGetChar()
+char SynchConsole::SynchGetChar()
 {
-	readChar->P();
-
-	readAvail->P ();
-	return console->GetChar();
-
-	readChar->V();
+	SemGetChar->P();
+	char ch;
+	readAvail->P ();	// wait for character to arrive
+	ch = console->GetChar ();
+	SemGetChar->V();
+	return ch;
 }
 
 void SynchConsole::SynchPutString(const char s[])
 {
-	writeString->P();
-	int i=0;
-	while(s[i]!='\0') {
-		SynchPutChar(s[i]);
-		i++;
+	SemPut->P();
+	int i;
+	for (i=0;i<MAX_STRING_SIZE && s[i]!='\0';i++){
+		console->PutChar ((char)s[i]);
+		writeDone->P ();	// wait for write to finish
 	}
-	writeString->V();
-	//copyStringFromMachine(machine->ReadRegister(4),(char*)s,MAX_STRING_SIZE);
+	SemPut->V();
 }
-
-void SynchConsole::SynchGetString(char *s,int n)
+/*
+void SynchConsole::SynchGetString(char *s, int n)
 {
-	//SynchPutString("entering GetString\n");
-	readString->P();
+	SemGetString->P();
 	char c;
-	int i=0;
-	for(i=0;i<n-1;i++){
-		
-		c = SynchGetChar();
-		//readAvail->V ();
-		if(c == '\n' || c == EOF)
+	int i;
+	for (i=0;i<n;i++){
+		c = synchconsole->SynchGetChar ();
+		if(c==EOF)
 			break;
-		//SynchPutString("entering for loop\n");
-		s[i]=c;
+		else
+			s[i] = c;
 	}
-	//SynchPutString("GOing out from GetString\n");
-
 	s[i]='\0';
-	readString->V();
-	//writeDone->P();
-	//readAvail->P ();
-	//s[0]=0;
+	SemGetString->V();
+}*/
+
+
+void SynchConsole::SynchGetString(char *s, int n)
+{
+	SemGetString->P();
+	char c;
+	int i;
+
+	c = synchconsole->SynchGetChar ();
+	if(c==EOF || c=='\n'){
+		s[0]='\0';
+		SemGetString->V();
+		return;
+	}
+	else
+		s[0] = c;
+	for (i=1;i<n;i++){
+		c = synchconsole->SynchGetChar ();
+		if(c==EOF && s[i-1]=='\n')
+			break;
+		else{
+			if(c==EOF)
+				i--;
+			else
+				s[i] = c;
+		}
+	}
+	s[i-1]='\0';
+	SemGetString->V();
 }
+
 
 void SynchConsole::SynchPutInt(int n)
 {
-	char *s = (char*) malloc(sizeof(char)*MAX_STRING_SIZE); 
-  	snprintf( s, MAX_STRING_SIZE, "%d",n);
-  	SynchPutString(s);
-	//writeDone->P();
+	char *s = new char(MAX_STRING_SIZE);
+	snprintf(s,MAX_STRING_SIZE,"%d",n);
+	synchconsole->SynchPutString(s);
 }
 
 int SynchConsole::SynchGetInt()
 {
-	putSem->P ();
 	char *s = (char*) malloc(sizeof(char)*MAX_STRING_SIZE); 
 	int value;
 	SynchGetString(s,MAX_STRING_SIZE);
   	sscanf(s,"%d",&value);
   	//machine->WriteMem(machine->ReadRegister(4),1,value);
 	return value;
-	//machine->WriteMem(machine->ReadRegister(4),1,&value);
 }
-
 
 void SynchConsole::copyStringFromMachine( int from, char *to, unsigned size) {
 	int i=0;

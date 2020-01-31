@@ -40,7 +40,7 @@
 #include "copyright.h"
 #include "utility.h"
 
-#ifdef USER_PROGRAM
+#ifdef USER_PROGRAM 
 #include "machine.h"
 #include "addrspace.h"
 #endif
@@ -53,7 +53,7 @@
 
 // Size of the thread's private execution stack.
 // WATCH OUT IF THIS ISN'T BIG ENOUGH!!!!!
-#define StackSize	(4 * 1024)	// in words
+#define StackSize   (4 * 1024)  // in words
 
 
 // Thread state
@@ -79,47 +79,47 @@ class Thread
   private:
     // NOTE: DO NOT CHANGE the order of these first two members.
     // THEY MUST be in this position for SWITCH to work.
-    int *stackTop;		// the current stack pointer
-    int machineState[MachineStateSize];	// all registers except for stackTop
+    int *stackTop;      // the current stack pointer
+    int machineState[MachineStateSize]; // all registers except for stackTop
 
   public:
-      Thread (const char *debugName);	// initialize a Thread 
-     ~Thread ();		// deallocate a Thread
+      Thread (const char *debugName);   // initialize a Thread 
+     ~Thread ();        // deallocate a Thread
     // NOTE -- thread being deleted
     // must not be running when delete 
     // is called
 
     // basic thread operations
 
-    void Fork (VoidFunctionPtr func, int arg);	// Make thread run (*func)(arg)
-    void Yield ();		// Relinquish the CPU if any 
+    void Fork (VoidFunctionPtr func, int arg);  // Make thread run (*func)(arg)
+    void Yield ();      // Relinquish the CPU if any 
     // other thread is runnable
-    void Sleep ();		// Put the thread to sleep and 
+    void Sleep ();      // Put the thread to sleep and 
     // relinquish the processor
-    void Finish ();		// The thread is done executing
+    void Finish ();     // The thread is done executing
 
-    void CheckOverflow ();	// Check if thread has 
+    void CheckOverflow ();  // Check if thread has 
     // overflowed its stack
     void setStatus (ThreadStatus st)
     {
-	status = st;
+    status = st;
     }
     const char *getName ()
     {
-	return (name);
+    return (name);
     }
     void Print ()
     {
-	printf ("%s, ", name);
+    printf ("%s, ", name);
     }
 
   private:
     // some of the private data for this class is listed above
 
-    int *stack;			// Bottom of the stack 
+    int *stack;         // Bottom of the stack 
     // NULL if this is the main thread
     // (If NULL, don't deallocate stack)
-    ThreadStatus status;	// ready, running or blocked
+    ThreadStatus status;    // ready, running or blocked
     const char *name;
 
 
@@ -132,13 +132,13 @@ class Thread
 // one for its state while executing user code, one for its state 
 // while executing kernel code.
 
-    int userRegisters[NumTotalRegs];	// user-level CPU register state
+    int userRegisters[NumTotalRegs];    // user-level CPU register state
     int idThread;
   public:
-    void SaveUserState ();	// save user-level register state
-    void RestoreUserState ();	// restore user-level register state
+    void SaveUserState ();  // save user-level register state
+    void RestoreUserState ();   // restore user-level register state
 
-    AddrSpace *space;		// User code this thread is running.
+    AddrSpace *space;       // User code this thread is running.
     int GetIdThread();
     void SetIdThread(int id);
 #endif
@@ -158,4 +158,4 @@ extern "C"
     void SWITCH (Thread * oldThread, Thread * newThread);
 }
 
-#endif				// THREAD_H
+#endif              // THREAD_H

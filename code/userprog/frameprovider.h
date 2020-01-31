@@ -1,7 +1,8 @@
-#include "copyright.h"
-#include "system.h"
-#include "bitmap.h"
+#ifndef FRAMEPROVIDER_H
+#define FRAMEPROVIDER_H
 
+#include "bitmap.h"
+#include <strings.h>        
 
 class FrameProvider {
   public:
@@ -17,3 +18,6 @@ class FrameProvider {
     BitMap *bitmapFrame;
 
 };
+
+
+#endif // FRAMEPROVIDER_H

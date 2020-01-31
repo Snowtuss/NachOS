@@ -33,7 +33,8 @@
 // the user program immediately after the "syscall" instruction.
 //----------------------------------------------------------------------
 //static SynchConsole *sync;
-static Semaphore *readAvail = new Semaphore("read available", 0);;
+static Semaphore *readAvail = new Semaphore("read available", 0);
+
 static Semaphore *writeDone = new Semaphore("write done", 0);
 static void
 UpdatePC ()
@@ -77,13 +78,13 @@ ExceptionHandler (ExceptionType which)
 
     if ((which == SyscallException) && (type == SC_Halt))
       {
-	  DEBUG ('a', "Shutdown, initiated by user program.\n");
-	  interrupt->Halt ();
+    DEBUG ('a', "Shutdown, initiated by user program.\n");
+    interrupt->Halt ();
       }
     else
       {
-	  printf ("Unexpected user mode exception %d %d\n", which, type);
-	  ASSERT (FALSE);
+    printf ("Unexpected user mode exception %d %d\n", which, type);
+    ASSERT (FALSE);
       }
 
     // LB: Do not forget to increment the pc before returning!
@@ -109,20 +110,41 @@ ExceptionHandler(ExceptionType which)
   if (which == SyscallException) {
     switch (type) {
     case SC_Halt: {
-      DEBUG('a', "Shutdown, initiated by user program.\n");
-     // while(machine->nbThreads>0 && currentThread->GetIdThread() == 0)
-          //currentThread->space->LockHalt();
-        while(machine->nbThreads>0) //printf("hey");
-            currentThread->space->LockHalt();
+      
+      currentThread->space->nbThreadAccess->P();
+      
+      while(currentThread->space->GetNbThreads()>0) //printf("hey");
+      {
+        currentThread->space->nbThreadAccess->V();
+         currentThread->space->LockHalt();
+         currentThread->space->nbThreadAccess->P();
+
+      }
+           
           //printf("\nhey------------------\n");
         interrupt->Halt();
       break;
     }
     case SC_Exit: {
-      DEBUG('a', "Shutdown, initiated by user program.\n");
-      printf("\n\n*****The program was shutdown using a return n.*****\n");
-      interrupt->Halt();
-      break;
+
+      currentThread->space->nbThreadAccess->P();
+    
+      while(currentThread->space->GetNbThreads()>0) //printf("hey");
+      {
+        currentThread->space->nbThreadAccess->V();
+        currentThread->space->LockHalt();
+        currentThread->space->nbThreadAccess->P();
+      }
+      
+      UpdateNbProcess(-1);
+      delete currentThread->space;
+        if(GetNbProcess()>=0){
+          currentThread->Finish();
+        }
+        else{
+          interrupt->Halt ();
+        }
+        break;
     }
     case SC_PutChar: {
       readAvail->V();
@@ -215,6 +237,10 @@ ExceptionHandler(ExceptionType which)
       break;
     }
     case SC_ForkExec: {
+      char *str = (char *) malloc(MAX_STRING_SIZE*sizeof(char));
+      synchconsole->copyStringFromMachine(machine->ReadRegister(4),str,MAX_STRING_SIZE);
+      printf("OUR FILE IS  : %s\n",str);
+      machine->WriteRegister(2,do_ForkExec(str));
       break;
     }
     default: {
